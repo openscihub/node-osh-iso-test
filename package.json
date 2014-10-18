@@ -1,0 +1,26 @@
+{
+  "name": "osh-iso-test",
+  "version": "0.0.0",
+  "description": "openscihub.org: test your isomorphic web apps and frameworks",
+  "main": "index.js",
+  "browser": "browser.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "express": "^4.9.8",
+    "async": "^0.9.0",
+    "morgan": "^1.4.0"
+  },
+  "devDependencies": {
+    "serve-static": "^1.7.0"
+  },
+  "scripts": {
+    "test": "mocha -C test/test.js"
+  },
+  "keywords": [
+    "isomorphism"
+  ],
+  "author": "Carl A. Bauer",
+  "license": "MIT"
+}
