@@ -117,7 +117,7 @@ function iso(opts, done) {
       process.on('SIGINT', function() {
         console.log('Stopping server...');
         server && server.close();
-        process.exit();
+        done();
       });
     });
   }
