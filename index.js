@@ -61,7 +61,10 @@ function iso(opts, done) {
         done
       );
     },
-    start
+    function(err) {
+      if (err) done(err);
+      else start();
+    }
   );
 
   function start() {
