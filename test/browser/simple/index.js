@@ -1,15 +1,16 @@
 var serveStatic = require('serve-static');
 
 module.exports = function(app, done) {
-  var route = this.route;
+  var test = this;
 
   app.get('/', function(req, res) {
     res.send(
       '<html>' +
       '<body>' +
-      '<script src="/iso.js"></script>' +
-      '<script src="' + route + '/main.js"></script>' +
-      '</body>'
+      test.iso +
+      test.script('/main.js') +
+      '</body>' +
+      '</html>'
     );
   });
   app.use(serveStatic(__dirname));

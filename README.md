@@ -52,15 +52,14 @@ a callback. For example, `test/iso/test1/index.js` could be:
 var serveStatic = require('serve-static');
 
 module.exports = function(app, done) {
-  var route = this.route;
+  var test = this;
 
   app.get('/', function(req, res) {
     res.send(
-      '<html>' +
-      '<body>' +
-      '<script src="/iso.js"></script>' +
-      '<script src="' + route + '/main.js"></script>' +
-      '</body>'
+      '<html><body>' +
+      test.iso +                  // injects '<script src="/iso.js"></script>'
+      test.script('/main.js') +   // injects '<script src="/test1/main.js"></script>'
+      '</body></html>'
     );
   });
   app.use(serveStatic(__dirname));
@@ -79,10 +78,10 @@ test result back to the test runner.
 ## `this`/`iso` properties
 
 The following variables are accessible on the `this` object within the
-exported function in a test's `index.js` file and on the global `iso`
+exported function in a test's `index.js` file *and* on the global `iso`
 object in the browser.
 
-### test
+### name
 
 The name of the test. It is simply the name of the directory in which
 the `index.js` file is defined.
@@ -91,7 +90,7 @@ For example, in `test/iso/test1/index.js`, you get
 
 ```js
 module.exports = function(app, done) {
-  console.log(this.test); // test1
+  console.log(this.name); // test1
   done();
 };
 ```
@@ -99,8 +98,28 @@ module.exports = function(app, done) {
 
 ### route
 
-Simply `this.test` prefixed with `'/'`.
+Simply `this.name` prefixed with `'/'`.
 
+
+## `this` properties
+
+These are available in only the `index.js` function (i.e. the "server").
+
+### script
+
+A function to inject a script element with the proper path.
+Every test is hosted under a route defined by the name of its containing
+directory; it's annoying to have to manipulate `__dirname`.
+
+For example, in `test/iso/test1/index.js`:
+
+```js
+this.script('/main.js'); // '<script src="/test1/main.js"></script>'
+```
+
+## `iso` properties
+
+These are available in the browser only.
 
 ## `iso.report`
 

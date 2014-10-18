@@ -4,6 +4,30 @@ var express = require('express');
 var path = require('path');
 var fs = require('fs');
 var async = require('async');
+var Class = require('osh-class');
+
+var Test = Class({
+  constructor: function(opts) {
+    this.name = opts.name;
+    this.route = '/' + opts.name;
+  },
+
+  iso: '<script src="/iso.js"></script>',
+
+  script: function(opts) {
+    if ('string' == typeof opts) {
+      opts = {path: opts};
+    }
+
+    return (
+      '<script ' +
+        (opts.async ? 'async ' : '') +
+        'src="/' + this.name + opts.path + '" ' +
+      '>' +
+      '</script>'
+    );
+  }
+});
 
 function iso(opts, done) {
 
@@ -23,19 +47,16 @@ function iso(opts, done) {
 
   async.each(
     tests,
-    function(test, done) {
-      var dir = path.resolve(basedir, test);
+    function(name, done) {
+      var dir = path.resolve(basedir, name);
 
       var app = express();
       var init = require(dir);
 
-      runner.use('/' + test, app);
+      runner.use('/' + name, app);
 
       init.call(
-        {
-          route: '/' + test,
-          test: test
-        },
+        Test({name: name}),
         app,
         done
       );
