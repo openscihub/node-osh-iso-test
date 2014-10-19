@@ -16,4 +16,16 @@ describe('iso-test', function() {
       done
     );
   });
+
+  it('should execute only given tests', function(done) {
+    this.timeout(0);
+    iso(
+      {
+        basedir: __dirname + '/browser',
+        tests: ['simple'],
+        manual: false
+      },
+      done
+    );
+  });
 });

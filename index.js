@@ -54,12 +54,15 @@ function iso(opts, done) {
 
   var testIndex = -1;
   var results = [];
-  var tests = fs.readdirSync(basedir).filter(function(file) {
-    if (file[0] !== '.') {
-      file = path.resolve(basedir, file);
-      return fs.statSync(file).isDirectory();
-    }
-  });
+  var tests = (
+    opts.tests ||
+    fs.readdirSync(basedir).filter(function(file) {
+      if (file[0] !== '.') {
+        file = path.resolve(basedir, file);
+        return fs.statSync(file).isDirectory();
+      }
+    })
+  );
 
   async.each(tests, register, function(err) {
     if (err) done(err);
