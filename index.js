@@ -53,8 +53,9 @@ function iso(opts, done) {
   var runner = express();
   runner.use(morgan('combined'));
 
-  var testIndex = -1;
+  var testIndex = 0;
   var results = {};
+  var currentTest;
   var tests = (
     opts.tests ||
     fs.readdirSync(basedir).filter(function(file) {
@@ -74,6 +75,10 @@ function iso(opts, done) {
     var dir = path.resolve(basedir, name);
     var app = express();
     var init = require(dir);
+    runner.use('/' + name + '*', function(req, res, next) {
+      currentTest = name;
+      next();
+    });
     runner.use('/' + name, app);
     init.call(Test({name: name}), app, done);
   }
@@ -113,14 +118,9 @@ function iso(opts, done) {
     var exit = req.query.exit;
     var nextTest;
 
-    if (result) {
-      results[name] = result;
-      if (auto) nextTest = tests[++index];
-    }
-    else {
-      index = 0;
-      nextTest = tests[index];
-      results = {};
+    results[name] = result;
+    if (auto && testIndex < tests.length) {
+      nextTest = tests[testIndex];
     }
 
     res.set('cache-control', 'no-cache');
@@ -147,21 +147,29 @@ function iso(opts, done) {
         '<a href="/?exit=1">Finish</a>' : ''
       ) +
       (
-        (nextTest && auto && !exit) ?
+        auto && testIndex < tests.length ?
         '<script>document.location = "/' + nextTest + '";</script>' :
         ''
       ) +
       '</body></html>'
     );
 
-    if (exit || (!nextTest && auto)) end();
+    if (exit || (auto && testIndex === tests.length)) {
+      console.log('ending it');
+      console.log('testIndex', testIndex);
+      console.log('tests length', tests.length);
+      end();
+    }
+    else if (auto) {
+      testIndex++;
+    }
   }
 
   function script(req, res) {
     res.send(
       isoJs +
-      'iso.name = "' + tests[index] + '";' +
-      'iso.route = "/' + tests[index] + '";' +
+      'iso.name = "' + currentTest + '";' +
+      'iso.route = "/' + currentTest + '";' +
       'iso.manual = ' + manual + ';'
     );
   }
