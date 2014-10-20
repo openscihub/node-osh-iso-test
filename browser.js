@@ -1,30 +1,43 @@
 window['iso'] = {
+  ok: function(msg) {
+    this.report('Success: ' + msg);
+  },
+
+  fail: function(msg) {
+    this.report('Failure: ' + msg);
+  },
+
+  insertHtml: function() {
+    if (!this._htmlInserted) {
+      document.body.innerHTML = (
+        document.body.innerHTML +
+        '<div>' +
+          '<hr></hr>' +
+          '<h2>' + this.name + ' result:</h2>' +
+          '<p>' + this.result + '</p>' +
+          '<button onclick="iso.send()">Okay</button>' +
+        '</div>'
+      );
+      this._htmlInserted = true;
+    }
+  },
+
   report: function(result) {
+    if (this.result !== undefined) return;
+    this.result = result;
     if (iso.manual) {
-      if (this._result) send(this._result);
-      else {
-        document.body.innerHTML = (
-          document.body.innerHTML +
-          '<div>' +
-            '<hr></hr>' +
-            '<h2>Test result:</h2>' +
-            '<p>' + result + '</p>' +
-            '<button onclick="iso.report()">Okay</button>' +
-          '</div>'
-        );
-        this._result = result;
-      }
+      this.insertHtml();
     }
     else {
-      send(result);
+      this.send();
     }
+  },
 
-    function send(result) {
-      document.location = (
-        '/?' +
-        'result=' + encodeURIComponent(result) + '&' +
-        'test=' + iso.name
-      );
-    }
+  send: function() {
+    document.location = (
+      '/?' +
+      'result=' + encodeURIComponent(this.result) + '&' +
+      'test=' + this.name
+    );
   }
 };

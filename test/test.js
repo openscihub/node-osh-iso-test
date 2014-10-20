@@ -1,29 +1,39 @@
 var iso = require('..');
 
 describe('iso-test', function() {
-  it('should work', function(done) {
-    this.timeout(0);
-    iso(
-      {basedir: __dirname + '/browser'},
-      done
-    );
-  });
-
-  it('should wait for user', function(done) {
-    this.timeout(0);
-    iso(
-      {basedir: __dirname + '/browser', manual: true},
-      done
-    );
-  });
-
-  it('should execute only given tests', function(done) {
+  it('should automatically run a single test', function(done) {
     this.timeout(0);
     iso(
       {
+        title: 'Single auto test',
         basedir: __dirname + '/browser',
-        tests: ['simple'],
-        manual: false
+        tests: ['simple']
+      },
+      done
+    );
+  });
+
+  it('should let tester run the tests', function(done) {
+    this.timeout(0);
+    iso(
+      {
+        title: 'Manual tests',
+        basedir: __dirname + '/browser',
+        tests: ['simple', 'simple2'],
+        manual: true
+      },
+      done
+    );
+  });
+
+  it('should ignore multiple reports', function(done) {
+    this.timeout(0);
+    iso(
+      {
+        title: 'Ignore multiple reports',
+        basedir: __dirname + '/browser',
+        tests: ['multiple'],
+        manual: true
       },
       done
     );

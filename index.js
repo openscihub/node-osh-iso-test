@@ -45,6 +45,7 @@ function iso(opts, done) {
   var port = opts.port || 3333;
   var manual = !!opts.manual;
   var auto = !manual;
+  var title = opts.title || 'Tests';
 
   var server;
   var sockets = {};
@@ -130,7 +131,7 @@ function iso(opts, done) {
         '<link rel="stylesheet" href="/main.css" type="text/css">' +
       '</head>' +
       '<body>' +
-      '<h2>Tests</h2>' +
+      '<h2>' + title + '</h2>' +
       '<ul>' +
       tests.map(function(name, index) {
         return (
