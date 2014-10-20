@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var async = require('async');
 var Class = require('osh-class');
+var serveStatic = require('serve-static');
 
 
 var isoJs = fs.readFileSync(
@@ -42,7 +43,7 @@ function iso(opts, done) {
 
   var basedir = opts.basedir;
   var port = opts.port || 3333;
-  var manual = opts.manual;
+  var manual = !!opts.manual;
   var auto = !manual;
 
   var server;
@@ -53,7 +54,7 @@ function iso(opts, done) {
   runner.use(morgan('combined'));
 
   var testIndex = -1;
-  var results = [];
+  var results = {};
   var tests = (
     opts.tests ||
     fs.readdirSync(basedir).filter(function(file) {
@@ -80,6 +81,7 @@ function iso(opts, done) {
   function start() {
     runner.get('/', home);
     runner.get('/iso.js', script);
+    runner.use(serveStatic(__dirname + '/styles'));
 
     server = http.createServer(runner);
     server.on('connection', handleConnection);
@@ -107,33 +109,45 @@ function iso(opts, done) {
 
   function home(req, res) {
     var result = req.query.result;
+    var name = req.query.test;
     var exit = req.query.exit;
     var nextTest;
 
     if (result) {
-      nextTest = tests[++index];
-      results.push(result);
+      results[name] = result;
+      if (auto) nextTest = tests[++index];
     }
     else {
       index = 0;
       nextTest = tests[index];
-      results = [];
+      results = {};
     }
 
     res.set('cache-control', 'no-cache');
     res.send(
-      '<html><body>' +
+      '<html>' +
+      '<head>' +
+        '<link rel="stylesheet" href="/main.css" type="text/css">' +
+      '</head>' +
+      '<body>' +
+      '<h2>Tests</h2>' +
       '<ul>' +
-      results.map(function(result, index) {
-        return '<li>' + tests[index] + ': ' + result + '</li>';
+      tests.map(function(name, index) {
+        return (
+          '<li>' +
+            (manual ? ('<a class="run" href="/' + name + '">Run</a>') : '') +
+            '<b>' + name + '</b>' +
+            (results[name] ? ': ' + results[name] : '') +
+          '</li>'
+        );
       }).join('') +
       '</ul>' +
       (
         (manual && !exit) ?
-        '<a href="/?exit=1"><button>Finish</button></a>' : ''
+        '<a href="/?exit=1">Finish</a>' : ''
       ) +
       (
-        (nextTest && !exit) ?
+        (nextTest && auto && !exit) ?
         '<script>document.location = "/' + nextTest + '";</script>' :
         ''
       ) +
@@ -146,8 +160,9 @@ function iso(opts, done) {
   function script(req, res) {
     res.send(
       isoJs +
-      'iso.test = "' + tests[index] + '";' +
-      'iso.route = "/' + tests[index] + '";'
+      'iso.name = "' + tests[index] + '";' +
+      'iso.route = "/' + tests[index] + '";' +
+      'iso.manual = ' + manual + ';'
     );
   }
 
