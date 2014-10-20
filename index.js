@@ -155,9 +155,6 @@ function iso(opts, done) {
     );
 
     if (exit || (auto && testIndex === tests.length)) {
-      console.log('ending it');
-      console.log('testIndex', testIndex);
-      console.log('tests length', tests.length);
       end();
     }
     else if (auto) {
