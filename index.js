@@ -6,6 +6,7 @@ var fs = require('fs');
 var async = require('async');
 var Class = require('osh-class');
 var serveStatic = require('serve-static');
+var Cookies = require('cookies');
 
 
 var isoJs = fs.readFileSync(
@@ -76,7 +77,18 @@ function iso(opts, done) {
     var dir = path.resolve(basedir, name);
     var app = express();
     var init = require(dir);
-    runner.use('/' + name + '*', function(req, res, next) {
+    runner.use('/' + name, function(req, res, next) {
+      var cookies = new Cookies(req, res);
+      console.log('setting cookie!', name);
+      cookies.set(
+        'iso',
+        JSON.stringify({
+          name: name,
+          route: '/' + name,
+          manual: manual
+        }),
+        {httpOnly: false}
+      );
       currentTest = name;
       next();
     });
@@ -164,12 +176,12 @@ function iso(opts, done) {
   }
 
   function script(req, res) {
-    res.send(
-      isoJs +
-      'iso.name = "' + currentTest + '";' +
-      'iso.route = "/' + currentTest + '";' +
-      'iso.manual = ' + manual + ';'
-    );
+    res.send(isoJs);
+    //  isoJs +
+    //  'iso.name = "' + currentTest + '";' +
+    //  'iso.route = "/' + currentTest + '";' +
+    //  'iso.manual = ' + manual + ';'
+    //);
   }
 
   function end() {
