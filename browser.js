@@ -16,10 +16,11 @@
             '<hr></hr>' +
             '<h2>' + this.name + ' result:</h2>' +
             '<p>' + this.result + '</p>' +
-            '<button onclick="iso.send()">Okay</button>' +
+            '<button id="okay">Okay</button>' +
           '</div>'
         );
         this._htmlInserted = true;
+        document.getElementById('okay').onclick = this.send.bind(this);
       }
     },
   
