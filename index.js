@@ -84,7 +84,6 @@ function iso(opts, done) {
         route: '/' + name,
         manual: manual
       };
-      console.log('extending iso!!!! with', JSON.stringify(info));
       extend(iso, info); // export current test info for server logic.
       var cookies = new Cookies(req, res);
       cookies.set(
