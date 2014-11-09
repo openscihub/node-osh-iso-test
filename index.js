@@ -7,6 +7,7 @@ var async = require('async');
 var Class = require('osh-class');
 var serveStatic = require('serve-static');
 var Cookies = require('cookies');
+var extend = require('xtend/mutable');
 
 
 var isoJs = fs.readFileSync(
@@ -15,12 +16,12 @@ var isoJs = fs.readFileSync(
 );
 
 
-var Test = Class({
-  constructor: function(opts) {
-    this.name = opts.name;
-    this.route = '/' + opts.name;
-  },
+function Test(opts) {
+  this.name = opts.name;
+  this.route = '/' + opts.name;
+}
 
+extend(Test.prototype, {
   iso: '<script src="/iso.js"></script>',
 
   script: function(opts) {
@@ -31,13 +32,12 @@ var Test = Class({
     return (
       '<script ' +
         (opts.async ? 'async ' : '') +
-        'src="/' + this.name + opts.path + '" ' +
+        'src="' + this.route + opts.path + '" ' +
       '>' +
       '</script>'
     );
   }
 });
-
 
 
 function iso(opts, done) {
@@ -47,13 +47,14 @@ function iso(opts, done) {
   var manual = !!opts.manual;
   var auto = !manual;
   var title = opts.title || 'Tests';
+  var debug = opts.debug;
 
   var server;
   var sockets = {};
   var nextSocketId = 0;
 
   var runner = express();
-  runner.use(morgan('combined'));
+  debug && runner.use(morgan('combined'));
 
   var testIndex = 0;
   var results = {};
@@ -78,22 +79,24 @@ function iso(opts, done) {
     var app = express();
     var init = require(dir);
     runner.use('/' + name, function(req, res, next) {
+      var info = {
+        name: name,
+        route: '/' + name,
+        manual: manual
+      };
+      console.log('extending iso!!!! with', JSON.stringify(info));
+      extend(iso, info); // export current test info for server logic.
       var cookies = new Cookies(req, res);
-      console.log('setting cookie!', name);
       cookies.set(
         'iso',
-        JSON.stringify({
-          name: name,
-          route: '/' + name,
-          manual: manual
-        }),
+        JSON.stringify(info),
         {httpOnly: false}
       );
       currentTest = name;
       next();
     });
     runner.use('/' + name, app);
-    init.call(Test({name: name}), app, done);
+    init.call(new Test({name: name}), app, done);
   }
 
   function start() {
@@ -203,5 +206,7 @@ function iso(opts, done) {
     process.removeListener('SIGINT', end);
   }
 }
+
+extend(iso, Test.prototype);
 
 module.exports = iso;

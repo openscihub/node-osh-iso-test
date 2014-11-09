@@ -13,6 +13,18 @@ describe('iso-test', function() {
     );
   });
 
+  it('should update iso global with current test info', function(done) {
+    this.timeout(0);
+    iso(
+      {
+        title: 'Server iso global',
+        basedir: __dirname + '/browser',
+        tests: ['server']
+      },
+      done
+    );
+  });
+
   it('should let tester run the tests', function(done) {
     this.timeout(0);
     iso(
