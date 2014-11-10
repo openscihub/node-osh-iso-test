@@ -1,5 +1,5 @@
 (function() {
-  var iso = {
+  var stem = {
     ok: function(msg) {
       this.report('Success: ' + msg);
     },
@@ -14,7 +14,7 @@
           document.body.innerHTML +
           '<div>' +
             '<hr></hr>' +
-            '<h2>' + this.name + ' result:</h2>' +
+            '<h2>' + this.testName + ' result:</h2>' +
             '<p>' + this.result + '</p>' +
             '<button id="okay">Okay</button>' +
           '</div>'
@@ -27,7 +27,7 @@
     report: function(result) {
       if (this.result !== undefined) return;
       this.result = result;
-      if (iso.manual) {
+      if (stem.manual) {
         this.insertHtml();
       }
       else {
@@ -37,25 +37,25 @@
   
     send: function() {
       document.location = (
-        '/?' +
+        '/__stem?' +
         'result=' + encodeURIComponent(this.result) + '&' +
-        'test=' + this.name
+        'test=' + this.testName
       );
     }
   };
 
   var test = JSON.parse(
-    /iso=(\{[^}]+\})/.exec(document.cookie)[1]
+    /stem=(\{[^}]+\})/.exec(document.cookie)[1]
   );
   
   for (var key in test) {
-    iso[key] = test[key];
+    stem[key] = test[key];
   }
 
   if (typeof exports == 'undefined') {
-    window['iso'] = iso;
+    window['stem'] = stem;
   }
   else {
-    module.exports = iso;
+    module.exports = stem;
   }
 })();

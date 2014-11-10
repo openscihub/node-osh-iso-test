@@ -8,21 +8,21 @@ var Class = require('osh-class');
 var serveStatic = require('serve-static');
 var Cookies = require('cookies');
 var extend = require('xtend/mutable');
+var crypto = require('crypto');
 
-
-var isoJs = fs.readFileSync(
+var stemJs = fs.readFileSync(
   __dirname + '/browser.js',
   {encoding: 'utf8'}
 );
 
 
 function Test(opts) {
-  this.name = opts.name;
-  this.route = '/' + opts.name;
+  this.testName = opts.testName;
+  this.route = '/' + opts.testName;
 }
 
 extend(Test.prototype, {
-  iso: '<script src="/iso.js"></script>',
+  stem: '<script src="/stem.js"></script>',
 
   script: function(opts) {
     if ('string' == typeof opts) {
@@ -40,7 +40,7 @@ extend(Test.prototype, {
 });
 
 
-function iso(opts, done) {
+function stem(opts, done) {
 
   var basedir = opts.basedir;
   var port = opts.port || 3333;
@@ -48,6 +48,9 @@ function iso(opts, done) {
   var auto = !manual;
   var title = opts.title || 'Tests';
   var debug = opts.debug;
+  var id = crypto.pseudoRandomBytes(4).toString('hex');
+  var stemRoute = '/__stem';
+  var apps = {};
 
   var server;
   var sockets = {};
@@ -74,41 +77,45 @@ function iso(opts, done) {
     else start();
   });
 
-  function register(name, done) {
-    var dir = path.resolve(basedir, name);
+  function register(testName, done) {
+    var dir = path.resolve(basedir, testName);
     var app = express();
     var init = require(dir);
-    runner.use('/' + name, function(req, res, next) {
+    runner.use(stemRoute + '/' + testName, function(req, res, next) {
       var info = {
-        name: name,
-        route: '/' + name,
+        testName: testName,
         manual: manual
       };
-      extend(iso, info); // export current test info for server logic.
+      extend(stem, info); // export current test info for server logic.
       var cookies = new Cookies(req, res);
       cookies.set(
-        'iso',
+        'stem',
         JSON.stringify(info),
         {httpOnly: false}
       );
-      currentTest = name;
-      next();
+      currentTest = testName;
+      res.redirect('/');
     });
-    runner.use('/' + name, app);
-    init.call(new Test({name: name}), app, done);
+    init.call(
+      new Test({testName: testName}),
+      app,
+      done
+    );
+    apps[testName] = app;
   }
 
   function start() {
-    runner.get('/', home);
-    runner.get('/iso.js', script);
+    runner.get(stemRoute, home);
+    runner.get('/stem.js', script);
     runner.use(serveStatic(__dirname + '/styles'));
+    runner.use('/', serveTest);
 
     server = http.createServer(runner);
     server.on('connection', handleConnection);
     server.listen(port, function(err) {
       if (err) done(err);
       else {
-        console.log('Browser to http://localhost:' + port + '.');
+        console.log('Browser to http://localhost:' + port + stemRoute + '.');
         process.on('SIGINT', end);
       }
     });
@@ -127,13 +134,18 @@ function iso(opts, done) {
     });
   }
 
+  function serveTest(req, res, next) {
+    if (currentTest) apps[currentTest](req, res);
+    else next();
+  }
+
   function home(req, res) {
     var result = req.query.result;
-    var name = req.query.test;
+    var testName = req.query.test;
     var exit = req.query.exit;
     var nextTest;
 
-    results[name] = result;
+    results[testName] = result;
     if (auto && testIndex < tests.length) {
       nextTest = tests[testIndex];
     }
@@ -147,23 +159,23 @@ function iso(opts, done) {
       '<body>' +
       '<h2>' + title + '</h2>' +
       '<ul>' +
-      tests.map(function(name, index) {
+      tests.map(function(testName, index) {
         return (
           '<li>' +
-            (manual ? ('<a class="run" href="/' + name + '">Run</a>') : '') +
-            '<b>' + name + '</b>' +
-            (results[name] ? ': ' + results[name] : '') +
+            (manual ? ('<a class="run" href="' + stemRoute + '/' + testName + '">Run</a>') : '') +
+            '<b>' + testName + '</b>' +
+            (results[testName] ? ': ' + results[testName] : '') +
           '</li>'
         );
       }).join('') +
       '</ul>' +
       (
         (manual && !exit) ?
-        '<a href="/?exit=1">Finish</a>' : ''
+        '<a href="' + stemRoute + '?exit=1">Finish</a>' : ''
       ) +
       (
         auto && testIndex < tests.length ?
-        '<script>document.location = "/' + nextTest + '";</script>' :
+        '<script>document.location = "' + stemRoute + '/' + nextTest + '";</script>' :
         ''
       ) +
       '</body></html>'
@@ -178,11 +190,11 @@ function iso(opts, done) {
   }
 
   function script(req, res) {
-    res.send(isoJs);
-    //  isoJs +
-    //  'iso.name = "' + currentTest + '";' +
-    //  'iso.route = "/' + currentTest + '";' +
-    //  'iso.manual = ' + manual + ';'
+    res.send(stemJs);
+    //  stemJs +
+    //  'stem.name = "' + currentTest + '";' +
+    //  'stem.route = "/' + currentTest + '";' +
+    //  'stem.manual = ' + manual + ';'
     //);
   }
 
@@ -206,6 +218,6 @@ function iso(opts, done) {
   }
 }
 
-extend(iso, Test.prototype);
+extend(stem, Test.prototype);
 
-module.exports = iso;
+module.exports = stem;

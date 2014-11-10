@@ -1,7 +1,7 @@
-var route = document.getElementById('route').textContent;
-if (route !== '/server') {
-  iso.fail('No test info on server iso func');
+var testName = document.getElementById('testName').textContent;
+if (testName !== 'server') {
+  stem.fail('No test info on server stem func');
 }
 else {
-  iso.ok('');
+  stem.ok('');
 }
