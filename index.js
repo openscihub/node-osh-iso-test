@@ -72,6 +72,13 @@ function stem(opts, done) {
     })
   );
 
+  runner.use(function(req, res, next) {
+    stem.fail = stem.ok = function(msg) {
+      res.redirect(stemRoute + '/?test=' + currentTest + '&result=' + msg);
+    };
+    next();
+  });
+
   async.each(tests, register, function(err) {
     if (err) done(err);
     else start();
@@ -218,6 +225,14 @@ function stem(opts, done) {
   }
 }
 
-extend(stem, Test.prototype);
+extend(stem, Test.prototype, {
+  fail: function(msg) {
+
+  },
+
+  ok: function(msg) {
+
+  }
+});
 
 module.exports = stem;

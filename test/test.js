@@ -25,6 +25,19 @@ describe('stem-test', function() {
     );
   });
 
+  it('should allow fail on server', function(done) {
+    this.timeout(0);
+    stem(
+      {
+        title: 'Fail on server',
+        basedir: __dirname + '/browser',
+        tests: ['fail-server', 'ok-server'],
+        manual: true
+      },
+      done
+    );
+  });
+
   it('should let tester run the tests', function(done) {
     this.timeout(0);
     stem(

@@ -3,7 +3,6 @@ var stem = require('../../..');
 
 module.exports = function(app, done) {
   app.get('/', function(req, res) {
-    console.log(stem.testName, stem.route, stem.manual);
     res.send(
       '<html>' +
       '<body>' +
