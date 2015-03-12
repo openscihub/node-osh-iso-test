@@ -1,13 +1,13 @@
 var serveStatic = require('serve-static');
-var stem = require('../../..');
+var iso = require('../../..');
 
 module.exports = function(app, done) {
   app.get('/', function(req, res) {
     res.send(
       '<html>' +
       '<body>' +
-      '<div id="testName">' + stem.testName + '</div>' +
-        '<script src="/stem.js"></script>' +
+      '<div id="testName">' + iso.testName + '</div>' +
+        '<script src="/iso.js"></script>' +
         '<script src="/main.js"></script>' +
       '</body>' +
       '</html>'

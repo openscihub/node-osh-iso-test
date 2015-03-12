@@ -1,7 +1,7 @@
 var testName = document.getElementById('testName').textContent;
 if (testName !== 'server') {
-  stem.fail('No test info on server stem func');
+  iso.fail('No test info on server iso func');
 }
 else {
-  stem.ok('');
+  iso.ok('');
 }

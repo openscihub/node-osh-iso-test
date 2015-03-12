@@ -7,7 +7,7 @@ module.exports = function(app, done) {
     res.send(
       '<html>' +
       '<body>' +
-        '<script src="/stem.js"></script>' +
+        '<script src="/iso.js"></script>' +
         '<script src="/main.js"></script>' +
       '</body>' +
       '</html>'

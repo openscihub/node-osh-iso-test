@@ -1,9 +1,9 @@
-var stem = require('..');
+var iso = require('..');
 
-describe('stem-test', function() {
+describe('iso-test', function() {
   it('should automatically run a single test', function(done) {
     this.timeout(0);
-    stem(
+    iso(
       {
         title: 'Single auto test',
         basedir: __dirname + '/browser',
@@ -13,11 +13,11 @@ describe('stem-test', function() {
     );
   });
 
-  it('should update stem global with current test info', function(done) {
+  it('should update iso global with current test info', function(done) {
     this.timeout(0);
-    stem(
+    iso(
       {
-        title: 'Server stem global',
+        title: 'Server iso global',
         basedir: __dirname + '/browser',
         tests: ['server']
       },
@@ -27,7 +27,7 @@ describe('stem-test', function() {
 
   it('should allow fail on server', function(done) {
     this.timeout(0);
-    stem(
+    iso(
       {
         title: 'Fail on server',
         basedir: __dirname + '/browser',
@@ -40,7 +40,7 @@ describe('stem-test', function() {
 
   it('should let tester run the tests', function(done) {
     this.timeout(0);
-    stem(
+    iso(
       {
         title: 'Manual tests',
         basedir: __dirname + '/browser',
@@ -53,7 +53,7 @@ describe('stem-test', function() {
 
   it('should ignore multiple reports', function(done) {
     this.timeout(0);
-    stem(
+    iso(
       {
         title: 'Ignore multiple reports',
         basedir: __dirname + '/browser',

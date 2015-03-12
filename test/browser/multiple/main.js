@@ -1,2 +1,2 @@
-stem.report('Success');
-stem.report('Failure');
+iso.report('Success');
+iso.report('Failure');

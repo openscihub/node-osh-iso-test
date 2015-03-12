@@ -1,8 +1,8 @@
-var stem = require('../../..');
+var iso = require('../../..');
 
 module.exports = function(app, done) {
   app.get('/', function(req, res) {
-    stem.fail('Actually, success; fail() was called successfully on server');
+    iso.fail('Actually, success; fail() was called successfully on server');
   });
   done();
 };

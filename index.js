@@ -10,7 +10,7 @@ var Cookies = require('cookies');
 var extend = require('xtend/mutable');
 var crypto = require('crypto');
 
-var stemJs = fs.readFileSync(
+var isoJs = fs.readFileSync(
   __dirname + '/browser.js',
   {encoding: 'utf8'}
 );
@@ -22,7 +22,7 @@ function Test(opts) {
 }
 
 extend(Test.prototype, {
-  stem: '<script src="/stem.js"></script>',
+  iso: '<script src="/iso.js"></script>',
 
   script: function(opts) {
     if ('string' == typeof opts) {
@@ -40,7 +40,7 @@ extend(Test.prototype, {
 });
 
 
-function stem(opts, done) {
+function iso(opts, done) {
 
   var basedir = opts.basedir;
   var port = opts.port || 3333;
@@ -49,7 +49,7 @@ function stem(opts, done) {
   var title = opts.title || 'Tests';
   var debug = opts.debug;
   var id = crypto.pseudoRandomBytes(4).toString('hex');
-  var stemRoute = '/__stem';
+  var isoRoute = '/__iso';
   var apps = {};
 
   var server;
@@ -73,8 +73,8 @@ function stem(opts, done) {
   );
 
   runner.use(function(req, res, next) {
-    stem.fail = stem.ok = function(msg) {
-      res.redirect(stemRoute + '/?test=' + currentTest + '&result=' + msg);
+    iso.fail = iso.ok = function(msg) {
+      res.redirect(isoRoute + '/?test=' + currentTest + '&result=' + msg);
     };
     next();
   });
@@ -88,15 +88,15 @@ function stem(opts, done) {
     var dir = path.resolve(basedir, testName);
     var app = express();
     var init = require(dir);
-    runner.use(stemRoute + '/' + testName, function(req, res, next) {
+    runner.use(isoRoute + '/' + testName, function(req, res, next) {
       var info = {
         testName: testName,
         manual: manual
       };
-      extend(stem, info); // export current test info for server logic.
+      extend(iso, info); // export current test info for server logic.
       var cookies = new Cookies(req, res);
       cookies.set(
-        'stem',
+        'iso',
         JSON.stringify(info),
         {httpOnly: false}
       );
@@ -112,8 +112,8 @@ function stem(opts, done) {
   }
 
   function start() {
-    runner.get(stemRoute, home);
-    runner.get('/stem.js', script);
+    runner.get(isoRoute, home);
+    runner.get('/iso.js', script);
     runner.use(serveStatic(__dirname + '/styles'));
     runner.use('/', serveTest);
 
@@ -122,7 +122,7 @@ function stem(opts, done) {
     server.listen(port, function(err) {
       if (err) done(err);
       else {
-        console.log('Browser to http://localhost:' + port + stemRoute + '.');
+        console.log('Browser to http://localhost:' + port + isoRoute + '.');
         process.on('SIGINT', end);
       }
     });
@@ -169,7 +169,7 @@ function stem(opts, done) {
       tests.map(function(testName, index) {
         return (
           '<li>' +
-            (manual ? ('<a class="run" href="' + stemRoute + '/' + testName + '">Run</a>') : '') +
+            (manual ? ('<a class="run" href="' + isoRoute + '/' + testName + '">Run</a>') : '') +
             '<b>' + testName + '</b>' +
             (results[testName] ? ': ' + results[testName] : '') +
           '</li>'
@@ -178,11 +178,11 @@ function stem(opts, done) {
       '</ul>' +
       (
         (manual && !exit) ?
-        '<a href="' + stemRoute + '?exit=1">Finish</a>' : ''
+        '<a href="' + isoRoute + '?exit=1">Finish</a>' : ''
       ) +
       (
         auto && testIndex < tests.length ?
-        '<script>document.location = "' + stemRoute + '/' + nextTest + '";</script>' :
+        '<script>document.location = "' + isoRoute + '/' + nextTest + '";</script>' :
         ''
       ) +
       '</body></html>'
@@ -197,11 +197,11 @@ function stem(opts, done) {
   }
 
   function script(req, res) {
-    res.send(stemJs);
-    //  stemJs +
-    //  'stem.name = "' + currentTest + '";' +
-    //  'stem.route = "/' + currentTest + '";' +
-    //  'stem.manual = ' + manual + ';'
+    res.send(isoJs);
+    //  isoJs +
+    //  'iso.name = "' + currentTest + '";' +
+    //  'iso.route = "/' + currentTest + '";' +
+    //  'iso.manual = ' + manual + ';'
     //);
   }
 
@@ -225,7 +225,7 @@ function stem(opts, done) {
   }
 }
 
-extend(stem, Test.prototype, {
+extend(iso, Test.prototype, {
   fail: function(msg) {
 
   },
@@ -235,4 +235,4 @@ extend(stem, Test.prototype, {
   }
 });
 
-module.exports = stem;
+module.exports = iso;
